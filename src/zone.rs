@@ -25,13 +25,16 @@ impl Record {
             .header(CONTENT_TYPE, "application/json")
             .header("X-Auth-Email", auth_email)
             .header("X-Auth-Key", auth_key)
-            .body(format!("{{\"content\": \"{}\", \"name\": \"{}\", \"type\": \"A\"}}", new_ip, self.name))
+            .body(format!(
+                "{{\"content\": \"{}\", \"name\": \"{}\", \"type\": \"A\"}}",
+                new_ip, self.name
+            ))
             .send()
-            .await {
-                Err(_) => false,
-                Ok(v) => v.error_for_status().is_ok()
-            }
-            
+            .await
+        {
+            Err(_) => false,
+            Ok(v) => v.error_for_status().is_ok(),
+        }
     }
 }
 

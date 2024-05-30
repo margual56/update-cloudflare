@@ -10,10 +10,11 @@ async fn get_ip(client: &reqwest::Client) -> Result<String, reqwest::Error> {
         .send()
         .await?
         .text()
-        .await {
-            Err(e) => Err(e),
-            Ok(v) => Ok(v.trim().replace("\n", ""))
-        }
+        .await
+    {
+        Err(e) => Err(e),
+        Ok(v) => Ok(v.trim().replace("\n", "")),
+    }
 }
 
 #[derive(Parser, Debug)]
@@ -29,7 +30,7 @@ struct Args {
 
     #[arg(short, long)]
     /// Global API key
-    key: String,   
+    key: String,
 }
 
 #[tokio::main]
@@ -43,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let spl = record.split(".").collect::<Vec<&str>>();
 
         zone_queue.insert(spl[spl.len() - 2..].join("."));
-    };
+    }
 
     println!("Set of zones to update: {:?}", zone_queue);
 
@@ -64,15 +65,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .into_iter()
             .filter(|record| record_queue.contains(&record.name))
         {
-            print!("Updating {}...\t\t", record.name.yellow());
-
-            if !record
-                .update_ip(&client, &zone.id, &current_ip, &args.email, &args.key)
-                .await
-            {
-                println!("{}", format!("{}", "ERROR".red().bold()));
+            if record.content == current_ip {
+                println!("Record {} is already up to date :)", record.name.yellow());
             } else {
-                println!("{}", format!("{}", "Success :)".bright_green().italic()));
+                print!("Updating {}...\t\t", record.name.yellow());
+
+                if !record
+                    .update_ip(&client, &zone.id, &current_ip, &args.email, &args.key)
+                    .await
+                {
+                    println!("{}", format!("{}", "ERROR".red().bold()));
+                } else {
+                    println!("{}", format!("{}", "Success :)".bright_green().italic()));
+                }
             }
         }
     }
