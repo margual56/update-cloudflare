@@ -4,14 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.5.4", features = ["derive", "env"] }
 colored = "2.1.0"
 reqwest = { version = "0.12.4", features = ["json"] }
 serde = { version = "1.0.203", features = ["derive"] }
 tokio = { version = "1.37.0", features = ["full"] }
 
+[target.armv7-unknown-linux-gnueabihf.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
+
 [workspace.metadata.cross.target.armv7-unknown-linux-gnueabihf]
 # Install libssl-dev:arm64, see <https://github.com/cross-rs/cross/blob/main/docs/custom_images.md#adding-dependencies-to-existing-images>
-pre-build = [
-    "apt-get update && apt-get --assume-yes install libssl-dev"
-]
+pre-build = ["apt-get update && apt-get --assume-yes install libssl-dev"]

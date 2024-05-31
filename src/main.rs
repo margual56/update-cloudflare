@@ -20,15 +20,19 @@ async fn get_ip(client: &reqwest::Client) -> Result<String, reqwest::Error> {
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
+    #[arg(short, long, default_value_t = false)]
+    /// Lists all records associated with you account and exits
+    list: bool,
+
     /// List of records (subdomains) to update with your current public IP
     #[arg(short, long)]
     records: Vec<String>,
 
-    #[arg(short, long)]
+    #[arg(short, long, env = "CLOUDFLARE_EMAIL")]
     /// Email for account admin
     email: String,
 
-    #[arg(short, long)]
+    #[arg(short, long, env = "CLOUDFLARE_KEY")]
     /// Global API key
     key: String,
 }
@@ -36,6 +40,22 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+
+    let client = reqwest::Client::new();
+
+    if args.list {
+        for zone in get_all(&client, &args.email, &args.key).await.unwrap() {
+            for record in zone
+                .get_records(&client, &args.email, &args.key)
+                .await
+                .unwrap()
+            {
+                println!("{}", record.name.yellow());
+            }
+        }
+
+        return Ok(());
+    }
 
     let record_queue = args.records.as_slice();
 
@@ -47,8 +67,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!("Set of zones to update: {:?}", zone_queue);
-
-    let client = reqwest::Client::new();
 
     let current_ip = get_ip(&client).await.unwrap();
 
