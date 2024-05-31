@@ -15,3 +15,5 @@ Options:
 ```
 
 You can export (`export CLOUDFLARE_EMAIL=<your_email>`) the email and key so that you don't have to input them every time.
+
+Remember you can use [crontab.guru](https://crontab.guru/#0_0_*/2_*_*) to assist you in scheduling the run
